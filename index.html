@@ -31,8 +31,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .btn:hover{opacity:0.9;transform:translateY(-1px)}
 .btn-secondary{background:var(--bg3);color:var(--text)}
 .btn-danger{background:var(--danger);color:#fff}
-.btn-group{display:flex;gap:10px}
-.btn-group button{flex:1}
 .sidebar{
   width:260px;position:fixed;height:100vh;background:var(--bg2);
   padding:24px;border-right:1px solid var(--bg3);transition:0.3s;z-index:100
@@ -70,22 +68,20 @@ th{color:var(--text2);font-size:0.85rem;text-transform:uppercase}
 .overlay.show{display:block}
 .menu-toggle{display:none;background:var(--accent);border:none;color:#000;padding:10px 14px;border-radius:10px}
 .loading{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-top:transparent;border-radius:50%;animation:spin 0.8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
 .chat-box{height:300px;overflow-y:auto;background:var(--bg3);padding:12px;border-radius:10px;margin-bottom:12px}
 .chat-msg{margin:8px 0;padding:10px;border-radius:8px}
 .chat-msg.user{background:var(--accent);color:#000}
 .chat-msg.ai{background:var(--bg2)}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:768px){
  .sidebar{left:-260px}
  .sidebar.show{left:0}
  .main{margin-left:0;padding:18px}
  .menu-toggle{display:block}
- .btn-group{flex-direction:column}
 </style>
 </head>
 
 <body>
-
 <div class="overlay" id="overlay"></div>
 <div class="toast" id="toast"></div>
 
@@ -95,18 +91,21 @@ th{color:var(--text2);font-size:0.85rem;text-transform:uppercase}
     <h2 style="margin-bottom:8px">SmartEdu Enterprise</h2>
     <p style="color:var(--text2);margin-bottom:20px;font-size:0.9rem">School Management System</p>
 
-    <input id="email" type="email" placeholder="Email" autocomplete="email">
-    <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+    <div id="staffLogin">
+      <select id="staffRole">
+        <option value="admin">Admin</option>
+        <option value="teacher">Teacher</option>
+      </select>
+      <input id="staffPass" type="password" placeholder="Enter password">
+      <button class="btn" id="staffLoginBtn">Login</button>
+    </div>
 
-    <select id="role">
-      <option value="admin">Admin</option>
-      <option value="teacher">Teacher</option>
-      <option value="student">Student</option>
-    </select>
+    <hr style="border:none;border-top:1px solid var(--bg3);margin:20px 0">
 
-    <div class="btn-group" style="margin-top:16px">
-      <button class="btn" id="loginBtn">Login</button>
-      <button class="btn btn-secondary" id="registerBtn">Register</button>
+    <div id="studentLogin">
+      <input id="studentName" type="text" placeholder="Enter your name">
+      <button class="btn btn-secondary" id="studentLoginBtn">Enter as Student</button>
+      <p style="color:var(--text2);font-size:0.8rem;margin-top:8px">No password needed</p>
     </div>
   </div>
 </div>
@@ -119,7 +118,7 @@ th{color:var(--text2);font-size:0.85rem;text-transform:uppercase}
     <h3>SmartEdu</h3>
     <button class="nav-btn active" data-page="dashboard">📊 Dashboard</button>
     <button class="nav-btn" data-page="students">👨‍🎓 Students</button>
-    <button class="nav-btn" data-page="teachers" data-role="admin,teacher">👨‍🏫 Teachers</button>
+    <button class="nav-btn" data-page="teachers" id="teachersNav">👨‍🏫 Teachers</button>
     <button class="nav-btn" data-page="attendance">📋 Attendance</button>
     <button class="nav-btn" id="feesNav" data-page="fees">💰 Fees</button>
     <button class="nav-btn hidden" id="aiNav" data-page="ai">🤖 AI Help</button>
@@ -138,22 +137,10 @@ th{color:var(--text2);font-size:0.85rem;text-transform:uppercase}
 
     <div id="dashboard" class="page">
       <div class="grid">
-        <div class="stat-card">
-          <h3>Total Students</h3>
-          <h2 id="totalStudents">0</h2>
-        </div>
-        <div class="stat-card">
-          <h3>Total Teachers</h3>
-          <h2 id="totalTeachers">0</h2>
-        </div>
-        <div class="stat-card">
-          <h3>Fees Collected</h3>
-          <h2 id="feesTotal">UGX 0</h2>
-        </div>
-        <div class="stat-card">
-          <h3>Today's Attendance</h3>
-          <h2 id="attendanceRate">0%</h2>
-        </div>
+        <div class="stat-card"><h3>Total Students</h3><h2 id="totalStudents">0</h2></div>
+        <div class="stat-card"><h3>Total Teachers</h3><h2 id="totalTeachers">0</h2></div>
+        <div class="stat-card"><h3>Fees Collected</h3><h2 id="feesTotal">UGX 0</h2></div>
+        <div class="stat-card"><h3>Today's Attendance</h3><h2 id="attendanceRate">0%</h2></div>
       </div>
     </div>
 
@@ -213,7 +200,6 @@ th{color:var(--text2);font-size:0.85rem;text-transform:uppercase}
       </div>
     </div>
 
-    <!-- AI CHAT PAGE FOR STUDENTS -->
     <div id="ai" class="page hidden">
       <div class="card">
         <h2>AI Study Helper</h2>
@@ -228,7 +214,6 @@ th{color:var(--text2);font-size:0.85rem;text-transform:uppercase}
 </div>
 
 <script>
-/* FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyCdirNElI9jmhlGhOmEg4UkhdmHhzprjyw",
   authDomain: "billing-system-27bc6.firebaseapp.com",
@@ -249,80 +234,89 @@ let unsubscribers = [];
 
 document.addEventListener('DOMContentLoaded', ()=>{
   attachEvents();
-  auth.onAuthStateChanged(async user=>{
-    if(user){
-      await showApp(user);
-    }else{
-      showLogin();
-    }
-  });
+  const savedUid = localStorage.getItem('smartedu_uid');
+  if(savedUid){
+    auth.signInAnonymously().then(cred=>showApp(cred.user)).catch(()=>showLogin());
+  }
 });
 
 function attachEvents(){
-  document.getElementById('loginBtn').onclick = login;
-  document.getElementById('registerBtn').onclick = register;
+  document.getElementById('staffLoginBtn').onclick = staffLogin;
+  document.getElementById('studentLoginBtn').onclick = studentLogin;
   document.getElementById('logoutBtn').onclick = logout;
   document.getElementById('menuToggle').onclick = toggleSidebar;
   document.getElementById('overlay').onclick = toggleSidebar;
-
   document.getElementById('addStudentBtn').onclick = addStudent;
   document.getElementById('addTeacherBtn').onclick = addTeacher;
   document.getElementById('addFeeBtn').onclick = addFee;
   document.getElementById('sendChatBtn').onclick = sendChat;
-
   document.querySelectorAll('.nav-btn[data-page]').forEach(btn=>{
     btn.onclick = (e)=>showPage(e.currentTarget.dataset.page, e.currentTarget);
   });
-
-  document.getElementById('password').addEventListener('keydown', e=>{
-    if(e.key==='Enter') login();
-  });
 }
 
-async function login(){
-  const email = document.getElementById("email").value.trim();
-  const pass = document.getElementById("password").value.trim();
-  userRole = document.getElementById("role").value;
-
-  if(!email ||!pass) return showToast("Enter email and password", "error");
+async function staffLogin(){
+  const role = document.getElementById("staffRole").value;
+  const pass = document.getElementById("staffPass").value.trim();
+  if(!pass) return showToast("Enter password", "error");
 
   try{
-    document.getElementById('loginBtn').innerHTML = '<span class="loading"></span> Logging in...';
-    await auth.signInWithEmailAndPassword(email,pass);
+    document.getElementById('staffLoginBtn').innerHTML = '<span class="loading"></span> Checking...';
+    const passDoc = await db.collection('settings').doc('passwords').get();
+    if(!passDoc.exists) throw new Error("Passwords not set in Firestore");
+
+    const correctPass = role === 'admin'? passDoc.data().adminPass : passDoc.data().teacherPass;
+    if(pass!== correctPass) throw new Error("Wrong password");
+
+    const cred = await auth.signInAnonymously();
+    userRole = role;
+    await db.collection('users').doc(cred.user.uid).set({
+      role: role, name: role, loginTime: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    localStorage.setItem('smartedu_uid', cred.user.uid);
+    showApp(cred.user);
   }catch(e){
     showToast(e.message, "error");
-    document.getElementById('loginBtn').textContent = 'Login';
+    document.getElementById('staffLoginBtn').textContent = 'Login';
   }
 }
 
-async function register(){
-  const email = document.getElementById("email").value.trim();
-  const pass = document.getElementById("password").value.trim();
-  userRole = document.getElementById("role").value;
-
-  if(!email ||!pass) return showToast("Enter email and password", "error");
-  if(pass.length < 6) return showToast("Password must be 6+ characters", "error");
+async function studentLogin(){
+  const name = document.getElementById("studentName").value.trim();
+  if(!name) return showToast("Enter your name", "error");
 
   try{
-    document.getElementById('registerBtn').innerHTML = '<span class="loading"></span> Creating...';
-    await auth.createUserWithEmailAndPassword(email,pass);
-    showToast("Account created. Now login.");
+    document.getElementById('studentLoginBtn').innerHTML = '<span class="loading"></span> Entering...';
+    const cred = await auth.signInAnonymously();
+    userRole = 'student';
+    await db.collection('users').doc(cred.user.uid).set({
+      role: 'student', name: name, loginTime: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    const existing = await db.collection('students').where('uid','==',cred.user.uid).get();
+    if(existing.empty){
+      await db.collection('students').add({
+        name: name, class: '', uid: cred.user.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdBy: cred.user.uid
+      });
+    }
+    localStorage.setItem('smartedu_uid', cred.user.uid);
+    showApp(cred.user);
   }catch(e){
     showToast(e.message, "error");
-    document.getElementById('registerBtn').textContent = 'Register';
+    document.getElementById('studentLoginBtn').textContent = 'Enter as Student';
   }
 }
 
 async function showApp(user){
   currentUser = user;
-  const userDoc = await db.collection('users').doc(user.uid).get();
-  userRole = userDoc.exists? userDoc.data().role : userRole;
-
-  await saveUserRole(user.uid, userRole);
-
   document.getElementById("loginPage").classList.add("hidden");
   document.getElementById("app").classList.remove("hidden");
-  document.getElementById("userEmail").textContent = user.email;
+
+  const userDoc = await db.collection('users').doc(user.uid).get();
+  userRole = userDoc.data().role;
+
+  document.getElementById("userEmail").textContent = userDoc.data().name;
   document.getElementById("userBadge").textContent = userRole;
   document.getElementById("userBadge").className = `badge badge-${userRole}`;
 
@@ -333,17 +327,15 @@ async function showApp(user){
 function showLogin(){
   document.getElementById("loginPage").classList.remove("hidden");
   document.getElementById("app").classList.add("hidden");
-  document.getElementById('loginBtn').textContent = 'Login';
-  document.getElementById('registerBtn').textContent = 'Register';
+  document.getElementById('staffLoginBtn').textContent = 'Login';
+  document.getElementById('studentLoginBtn').textContent = 'Enter as Student';
 }
 
 function logout(){
   unsubscribers.forEach(unsub => unsub());
+  localStorage.removeItem('smartedu_uid');
   auth.signOut();
-}
-
-async function saveUserRole(uid, role){
-  await db.collection('users').doc(uid).set({role, email:auth.currentUser.email}, {merge:true});
+  showLogin();
 }
 
 function showPage(id, btn){
@@ -362,16 +354,13 @@ function toggleSidebar(){
 
 function applyRolePermissions(){
   const isStudent = userRole === 'student';
+  const isAdmin = userRole === 'admin';
 
-  // Hide nav items for students
   document.getElementById('feesNav').style.display = isStudent? 'none' : '';
+  document.getElementById('teachersNav').style.display = isAdmin? '' : 'none';
   document.getElementById('aiNav').style.display = isStudent? '' : 'none';
-
-  // Hide forms for students
   document.getElementById('studentForm').style.display = isStudent? 'none' : '';
-  document.getElementById('teacherForm').style.display = isStudent? 'none' : '';
-
-  // Hide action column for students
+  document.getElementById('teacherForm').style.display = isAdmin? '' : 'none';
   document.getElementById('actionHeader').style.display = isStudent? 'none' : '';
 }
 
@@ -379,101 +368,81 @@ async function addStudent(){
   if(userRole==='student') return showToast("No permission", "error");
   const name = document.getElementById('sName').value.trim();
   const cls = document.getElementById('sClass').value.trim();
-
   if(!name ||!cls) return showToast("Fill all fields", "error");
 
-  try{
-    await db.collection("students").add({
-      name,class:cls, uid: currentUser.uid,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-      createdBy:currentUser.uid
-    });
-    document.getElementById('sName').value='';
-    document.getElementById('sClass').value='';
-    showToast("Student added");
-  }catch(e){showToast(e.message,"error")}
+  await db.collection("students").add({
+    name,class:cls, uid: currentUser.uid,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+    createdBy:currentUser.uid
+  });
+  document.getElementById('sName').value='';
+  document.getElementById('sClass').value='';
+  showToast("Student added");
 }
 
 async function addTeacher(){
   if(userRole!=='admin') return showToast("Admin only", "error");
   const name = document.getElementById('tName').value.trim();
   const subject = document.getElementById('tSubject').value.trim();
-
   if(!name ||!subject) return showToast("Fill all fields", "error");
 
-  try{
-    await db.collection("teachers").add({
-      name,subject,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-      createdBy:currentUser.uid
-    });
-    document.getElementById('tName').value='';
-    document.getElementById('tSubject').value='';
-    showToast("Teacher added");
-  }catch(e){showToast(e.message,"error")}
+  await db.collection("teachers").add({
+    name,subject, createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+    createdBy:currentUser.uid
+  });
+  document.getElementById('tName').value='';
+  document.getElementById('tSubject').value='';
+  showToast("Teacher added");
 }
 
 async function addFee(){
   if(userRole!=='admin') return showToast("Admin only", "error");
   const student = document.getElementById('feeStudent').value.trim();
   const amount = Number(document.getElementById('feeAmount').value);
-
   if(!student ||!amount || amount<=0) return showToast("Enter valid data", "error");
 
-  try{
-    await db.collection("fees").add({
-      student,amount, uid: currentUser.uid,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-      createdBy:currentUser.uid
-    });
-    document.getElementById('feeStudent').value='';
-    document.getElementById('feeAmount').value='';
-    showToast("Payment recorded");
-  }catch(e){showToast(e.message,"error")}
+  await db.collection("fees").add({
+    student,amount, uid: currentUser.uid,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+    createdBy:currentUser.uid
+  });
+  document.getElementById('feeStudent').value='';
+  document.getElementById('feeAmount').value='';
+  showToast("Payment recorded");
 }
 
 async function deleteDoc(collection,id){
-  if(userRole==='student') return showToast("No permission", "error");
+  if(userRole!=='admin') return showToast("Admin only", "error");
   if(!confirm("Delete this record?")) return;
-
-  try{
-    await db.collection(collection).doc(id).delete();
-    showToast("Deleted");
-  }catch(e){showToast(e.message,"error")}
+  await db.collection(collection).doc(id).delete();
+  showToast("Deleted");
 }
 
 function loadData(){
   unsubscribers.forEach(unsub => unsub());
   unsubscribers = [];
 
-  // STUDENTS: Admin sees all, Student sees only their own
   let studentQuery = db.collection("students").orderBy('createdAt','desc');
   if(userRole === 'student'){
     studentQuery = db.collection("students").where('uid','==',currentUser.uid);
   }
 
   const unsub1 = studentQuery.onSnapshot(snap=>{
-    document.getElementById("totalStudents").textContent = userRole==='admin'? snap.size : 1;
+    document.getElementById("totalStudents").textContent = userRole==='admin'? snap.size : snap.size;
     let html="";
     snap.forEach(doc=>{
       const d = doc.data();
       const date = d.createdAt?new Date(d.createdAt.toDate()).toLocaleDateString():'-';
       const actions = userRole==='admin'
-       ? `<td><button class="btn btn-danger" style="padding:6px 12px;font-size:0.85rem" onclick="deleteDoc('students','${doc.id}')">Delete</button></td>`
-        : '';
-      html+=`<tr>
-        <td>${d.name}</td>
-        <td>${d.class}</td>
-        <td>${date}</td>
-        ${actions}
-      </tr>`;
+      ? `<td><button class="btn btn-danger" style="padding:6px 12px;font-size:0.85rem" onclick="deleteDoc('students','${doc.id}')">Delete</button></td>`
+        : '<td>-</td>';
+      html+=`<tr><td>${d.name}</td><td>${d.class}</td><td>${date}</td>${actions}</tr>`;
     });
     document.getElementById("studentList").innerHTML = html || '<tr><td colspan="4" style="text-align:center;color:var(--text2)">No students</td></tr>';
     if(userRole==='admin') loadAttendanceList(snap.docs);
   });
   unsubscribers.push(unsub1);
 
-  // TEACHERS: Admin only
   if(userRole==='admin'){
     const unsub2 = db.collection("teachers").orderBy('createdAt','desc').onSnapshot(snap=>{
       document.getElementById("totalTeachers").textContent = snap.size;
@@ -481,33 +450,21 @@ function loadData(){
       snap.forEach(doc=>{
         const d = doc.data();
         const date = d.createdAt?new Date(d.createdAt.toDate()).toLocaleDateString():'-';
-        html+=`<tr>
-          <td>${d.name}</td>
-          <td>${d.subject}</td>
-          <td>${date}</td>
-          <td><button class="btn btn-danger" style="padding:6px 12px;font-size:0.85rem" onclick="deleteDoc('teachers','${doc.id}')">Delete</button></td>
-        </tr>`;
+        html+=`<tr><td>${d.name}</td><td>${d.subject}</td><td>${date}</td>
+        <td><button class="btn btn-danger" style="padding:6px 12px;font-size:0.85rem" onclick="deleteDoc('teachers','${doc.id}')">Delete</button></td></tr>`;
       });
       document.getElementById("teacherList").innerHTML = html || '<tr><td colspan="4" style="text-align:center;color:var(--text2)">No teachers</td></tr>';
     });
     unsubscribers.push(unsub2);
-  }
 
-  // FEES: Admin only
-  if(userRole==='admin'){
     const unsub3 = db.collection("fees").orderBy('createdAt','desc').onSnapshot(snap=>{
-      let total=0;
-      let html="";
+      let total=0; let html="";
       snap.forEach(doc=>{
         const d = doc.data();
         total += d.amount;
         const date = d.createdAt?new Date(d.createdAt.toDate()).toLocaleDateString():'-';
-        html+=`<tr>
-          <td>${d.student}</td>
-          <td>UGX ${Number(d.amount).toLocaleString()}</td>
-          <td>${date}</td>
-          <td><button class="btn btn-danger" style="padding:6px 12px;font-size:0.85rem" onclick="deleteDoc('fees','${doc.id}')">Delete</button></td>
-        </tr>`;
+        html+=`<tr><td>${d.student}</td><td>UGX ${Number(d.amount).toLocaleString()}</td><td>${date}</td>
+        <td><button class="btn btn-danger" style="padding:6px 12px;font-size:0.85rem" onclick="deleteDoc('fees','${doc.id}')">Delete</button></td></tr>`;
       });
       document.getElementById("feesTotal").textContent = 'UGX '+total.toLocaleString();
       document.getElementById("feeList").innerHTML = html || '<tr><td colspan="4" style="text-align:center;color:var(--text2)">No payments</td></tr>';
@@ -536,33 +493,27 @@ function loadAttendanceList(studentDocs){
 async function markAttendance(studentId,name){
   if(userRole==='student') return showToast("No permission", "error");
   const today = new Date().toISOString().split('T')[0];
-  try{
-    await db.collection('attendance').doc(`${studentId}_${today}`).set({
-      studentId,name,date:today,status:'Present',
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-    showToast(`Marked ${name} present`);
-  }catch(e){showToast(e.message,"error")}
+  await db.collection('attendance').doc(`${studentId}_${today}`).set({
+    studentId,name,date:today,status:'Present',
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+  showToast(`Marked ${name} present`);
 }
 
-// SIMPLE AI CHAT - REPLACE WITH YOUR API CALL
 async function sendChat(){
   const input = document.getElementById('chatInput');
   const msg = input.value.trim();
   if(!msg) return;
-
   const chatBox = document.getElementById('chatBox');
   chatBox.innerHTML += `<div class="chat-msg user">${msg}</div>`;
   input.value='';
 
-  // Save to Firestore
   await db.collection('aiChats').add({
-    uid: currentUser.uid,
-    message: msg,
+    uid: currentUser.uid, message: msg,
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  // TODO: Replace this with your actual AI API call
+  // Replace this with your AI API call
   setTimeout(()=>{
     chatBox.innerHTML += `<div class="chat-msg ai">This is a placeholder reply. Connect your AI API here.</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -579,6 +530,5 @@ function showToast(msg,type='success'){
 window.deleteDoc = deleteDoc;
 window.markAttendance = markAttendance;
 </script>
-
 </body>
 </html>
