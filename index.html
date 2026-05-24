@@ -5,1064 +5,783 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SmartEdu Enterprise</title>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-<!-- Excel -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
 <style>
 :root{
-  --bg:#0f172a;
-  --bg2:#1e293b;
-  --bg3:#334155;
-  --text:#e2e8f0;
-  --accent:#38bdf8;
-  --success:#10b981;
-  --danger:#ef4444;
+--bg:#0f172a;
+--card:#1e293b;
+--text:#f1f5f9;
+--muted:#94a3b8;
+--accent:#38bdf8;
+--green:#10b981;
+--danger:#ef4444;
+--border:#334155;
 }
 
 *{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial,sans-serif;
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
 }
 
 body{
-  background:var(--bg);
-  color:var(--text);
+background:var(--bg);
+color:var(--text);
 }
 
 .hidden{
-  display:none!important;
+display:none;
 }
 
 /* LOGIN */
-
-.container{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
+.login-screen{
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
 }
 
 .login-card{
-  width:100%;
-  max-width:400px;
-  background:var(--bg2);
-  padding:30px;
-  border-radius:20px;
+background:var(--card);
+padding:30px;
+border-radius:20px;
+width:100%;
+max-width:400px;
+box-shadow:0 10px 30px rgba(0,0,0,.4);
 }
 
-input,
-select,
+.login-card h1{
+margin-bottom:10px;
+}
+
+.login-card p{
+color:var(--muted);
+margin-bottom:20px;
+}
+
+input,select,button{
+width:100%;
+padding:14px;
+border:none;
+outline:none;
+border-radius:12px;
+margin-top:12px;
+font-size:15px;
+}
+
+input,select{
+background:#334155;
+color:white;
+}
+
 button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border:none;
-  border-radius:12px;
-  font-size:15px;
+background:var(--accent);
+font-weight:bold;
+cursor:pointer;
 }
 
-input,
-select{
-  background:var(--bg3);
-  color:white;
-}
-
-button{
-  cursor:pointer;
-}
-
-.btn{
-  background:var(--accent);
-  color:black;
-  font-weight:bold;
-}
-
-.btn-danger{
-  background:var(--danger);
-  color:white;
+button:hover{
+opacity:.9;
 }
 
 /* APP */
+.app{
+display:flex;
+min-height:100vh;
+}
 
+/* SIDEBAR */
 .sidebar{
-  width:250px;
-  background:var(--bg2);
-  height:100vh;
-  position:fixed;
-  left:0;
-  top:0;
-  padding:20px;
+width:260px;
+background:#111827;
+padding:20px;
+border-right:1px solid var(--border);
 }
 
 .sidebar h2{
-  margin-bottom:20px;
-  color:var(--accent);
+margin-bottom:25px;
+color:var(--accent);
 }
 
 .nav-btn{
-  background:none;
-  color:white;
-  text-align:left;
-  margin:5px 0;
+background:transparent;
+color:white;
+text-align:left;
+padding:14px;
+border-radius:12px;
+margin-bottom:10px;
+border:1px solid transparent;
+}
+
+.nav-btn:hover{
+background:#1e293b;
 }
 
 .nav-btn.active{
-  background:var(--accent);
-  color:black;
+background:var(--accent);
+color:black;
 }
 
+/* MAIN */
 .main{
-  margin-left:250px;
-  padding:20px;
+flex:1;
+padding:20px;
+overflow:auto;
 }
 
-.page{
-  margin-top:20px;
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+flex-wrap:wrap;
+gap:10px;
 }
 
-/* CARDS */
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:15px;
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
+margin-bottom:25px;
 }
 
 .card{
-  background:var(--bg2);
-  padding:20px;
-  border-radius:20px;
+background:var(--card);
+padding:20px;
+border-radius:20px;
+border:1px solid var(--border);
 }
 
 .card h3{
-  margin-bottom:10px;
+color:var(--muted);
+font-size:14px;
+margin-bottom:10px;
 }
 
-/* TABLE */
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:15px;
+.card h2{
+font-size:28px;
 }
 
-th,td{
-  border-bottom:1px solid #334155;
-  padding:10px;
-  text-align:left;
+.page{
+display:none;
 }
 
-/* BILLING SYSTEM */
-
-.billing-wrapper{
-  background:#f0f3f8;
-  color:#0f172a;
-  border-radius:20px;
-  padding:20px;
+.page.active{
+display:block;
 }
 
-.summary-cards{
-  display:flex;
-  gap:15px;
-  flex-wrap:wrap;
-  margin-bottom:20px;
-}
-
-.summary-card{
-  flex:1;
-  min-width:180px;
-  background:white;
-  padding:20px;
-  border-radius:20px;
-}
-
-.summary-card h4{
-  margin-bottom:10px;
-}
-
-.summary-amount{
-  font-size:1.5rem;
-  font-weight:bold;
-}
-
+/* BILLING */
 .dashboard{
-  display:flex;
-  gap:20px;
-  flex-wrap:wrap;
+display:flex;
+gap:20px;
+flex-wrap:wrap;
 }
 
 .students-panel{
-  flex:1;
-  min-width:300px;
-  background:white;
-  padding:20px;
-  border-radius:20px;
+width:320px;
+background:var(--card);
+padding:20px;
+border-radius:20px;
+border:1px solid var(--border);
 }
 
 .detail-panel{
-  flex:2;
-  min-width:350px;
-  background:white;
-  padding:20px;
-  border-radius:20px;
-}
-
-.student-list{
-  margin-top:15px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  max-height:60vh;
-  overflow:auto;
+flex:1;
+min-width:300px;
+background:var(--card);
+padding:20px;
+border-radius:20px;
+border:1px solid var(--border);
 }
 
 .student-item{
-  background:#f8fafc;
-  padding:12px;
-  border-radius:15px;
-  border:1px solid #e2e8f0;
-  cursor:pointer;
+background:#334155;
+padding:12px;
+border-radius:12px;
+margin-bottom:10px;
+cursor:pointer;
+display:flex;
+justify-content:space-between;
+align-items:center;
 }
 
 .student-item:hover{
-  background:#eef4ea;
+background:#475569;
+}
+
+.balance{
+background:white;
+color:black;
+padding:4px 10px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
 }
 
 .form-row{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:15px;
 }
 
 .form-group{
-  flex:1;
-  min-width:150px;
+flex:1;
+min-width:120px;
 }
 
-.notification{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:black;
-  color:white;
-  padding:10px 20px;
-  border-radius:30px;
-  opacity:0;
-  transition:0.3s;
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+}
+
+th,td{
+padding:10px;
+border-bottom:1px solid #334155;
+text-align:left;
+font-size:14px;
+}
+
+.toast{
+position:fixed;
+bottom:20px;
+right:20px;
+background:var(--green);
+padding:12px 18px;
+border-radius:12px;
+display:none;
 }
 
 @media(max-width:768px){
 
-  .sidebar{
-    width:100%;
-    height:auto;
-    position:relative;
-  }
+.app{
+flex-direction:column;
+}
 
-  .main{
-    margin-left:0;
-  }
+.sidebar{
+width:100%;
+display:flex;
+overflow:auto;
+gap:10px;
+}
 
-  .dashboard{
-    flex-direction:column;
-  }
+.sidebar h2{
+display:none;
+}
+
+.nav-btn{
+min-width:150px;
+}
+
+.dashboard{
+flex-direction:column;
+}
+
+.students-panel{
+width:100%;
+}
+
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOAST -->
-<div class="notification" id="toast"></div>
-
 <!-- LOGIN -->
-<div id="loginPage" class="container">
+<div class="login-screen" id="loginPage">
+<div class="login-card">
+<h1>SmartEdu Enterprise</h1>
+<p>School Management System</p>
 
-  <div class="login-card">
+<select id="role">
+<option value="admin">Admin</option>
+<option value="teacher">Teacher</option>
+<option value="student">Student</option>
+</select>
 
-    <h2>SmartEdu Enterprise</h2>
+<input type="password" id="password" placeholder="Enter password">
 
-    <select id="role">
-      <option value="admin">Admin</option>
-      <option value="teacher">Teacher</option>
-      <option value="student">Student</option>
-    </select>
-
-    <input type="password" id="password" placeholder="Password">
-
-    <button class="btn" id="loginBtn">
-      Login
-    </button>
-
-  </div>
-
+<button onclick="login()">LOGIN</button>
+</div>
 </div>
 
 <!-- APP -->
-<div id="app" class="hidden">
+<div class="app hidden" id="app">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
+<!-- SIDEBAR -->
+<div class="sidebar">
 
-    <h2>SmartEdu</h2>
+<h2>SmartEdu</h2>
 
-    <button class="nav-btn active" data-page="dashboard">
-      📊 Dashboard
-    </button>
+<button class="nav-btn active" onclick="showPage('dashboard',this)">
+📊 Dashboard
+</button>
 
-    <button class="nav-btn" data-page="billing">
-      💰 Billing
-    </button>
+<button class="nav-btn" onclick="showPage('billing',this)">
+💰 Billing
+</button>
 
-    <button class="nav-btn" data-page="students">
-      👨‍🎓 Students
-    </button>
-
-    <button class="nav-btn" data-page="teachers">
-      👨‍🏫 Teachers
-    </button>
-
-    <button class="nav-btn btn-danger" id="logoutBtn">
-      Logout
-    </button>
-
-  </div>
-
-  <!-- MAIN -->
-  <div class="main">
-
-    <!-- DASHBOARD -->
-    <div id="dashboard" class="page">
-
-      <div class="grid">
-
-        <div class="card">
-          <h3>Total Students</h3>
-          <h1 id="totalStudents">0</h1>
-        </div>
-
-        <div class="card">
-          <h3>Total Teachers</h3>
-          <h1 id="totalTeachers">0</h1>
-        </div>
-
-        <div class="card">
-          <h3>Total Fees</h3>
-          <h1 id="totalFees">UGX 0</h1>
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- BILLING -->
-    <div id="billing" class="page hidden">
-
-      <div class="billing-wrapper">
-
-        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
-
-          <h2 style="color:#14532d;">
-            📚 SmartEdu Billing System
-          </h2>
-
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-
-            <input type="file" id="excelFile" hidden accept=".xlsx,.xls">
-
-            <button id="importBtn">
-              📁 Import Excel
-            </button>
-
-            <button id="exportBtn">
-              📊 Export Excel
-            </button>
-
-            <button id="printBtn">
-              🖨️ Print
-            </button>
-
-          </div>
-
-        </div>
-
-        <!-- SUMMARY -->
-        <div class="summary-cards">
-
-          <div class="summary-card">
-            <h4>Total Collected</h4>
-            <div class="summary-amount" id="totalCollected">
-              UGX 0
-            </div>
-          </div>
-
-          <div class="summary-card">
-            <h4>Total Pending</h4>
-            <div class="summary-amount" id="totalPending">
-              UGX 0
-            </div>
-          </div>
-
-          <div class="summary-card">
-            <h4>Students</h4>
-            <div class="summary-amount" id="billingStudentCount">
-              0
-            </div>
-          </div>
-
-        </div>
-
-        <!-- DASHBOARD -->
-        <div class="dashboard">
-
-          <!-- LEFT -->
-          <div class="students-panel">
-
-            <h3>👥 Students</h3>
-
-            <input
-              type="text"
-              id="searchStudent"
-              placeholder="Search student..."
-            >
-
-            <div class="student-list" id="studentListContainer"></div>
-
-            <hr style="margin:20px 0;">
-
-            <h3>Add Student</h3>
-
-            <div class="form-row">
-
-              <div class="form-group">
-                <input type="text" id="studentName" placeholder="Student name">
-              </div>
-
-              <div class="form-group">
-                <input type="text" id="studentClass" placeholder="Class">
-              </div>
-
-            </div>
-
-            <button class="btn" id="addStudentBtn">
-              Add Student
-            </button>
-
-          </div>
-
-          <!-- RIGHT -->
-          <div class="detail-panel">
-
-            <div id="studentDetail">
-
-              <p>
-                👈 Select student to manage billing
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- STUDENTS -->
-    <div id="students" class="page hidden">
-
-      <div class="card">
-
-        <h2>Students List</h2>
-
-        <table>
-
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Class</th>
-            </tr>
-          </thead>
-
-          <tbody id="studentsTable"></tbody>
-
-        </table>
-
-      </div>
-
-    </div>
-
-    <!-- TEACHERS -->
-    <div id="teachers" class="page hidden">
-
-      <div class="card">
-
-        <h2>Teachers</h2>
-
-        <div class="form-row">
-
-          <div class="form-group">
-            <input type="text" id="teacherName" placeholder="Teacher name">
-          </div>
-
-          <div class="form-group">
-            <input type="text" id="teacherSubject" placeholder="Subject">
-          </div>
-
-        </div>
-
-        <button class="btn" id="addTeacherBtn">
-          Add Teacher
-        </button>
-
-        <table>
-
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Subject</th>
-            </tr>
-          </thead>
-
-          <tbody id="teachersTable"></tbody>
-
-        </table>
-
-      </div>
-
-    </div>
-
-  </div>
+<button class="nav-btn" onclick="logout()">
+🚪 Logout
+</button>
 
 </div>
 
+<!-- MAIN -->
+<div class="main">
+
+<div class="topbar">
+<h1 id="pageTitle">Dashboard</h1>
+<div id="userInfo"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page active" id="dashboard">
+
+<div class="cards">
+
+<div class="card">
+<h3>Total Students</h3>
+<h2 id="studentCount">0</h2>
+</div>
+
+<div class="card">
+<h3>Total Collected</h3>
+<h2 id="totalCollected">UGX 0</h2>
+</div>
+
+<div class="card">
+<h3>Total Pending</h3>
+<h2 id="totalPending">UGX 0</h2>
+</div>
+
+</div>
+
+</div>
+
+<!-- BILLING -->
+<div class="page" id="billing">
+
+<div class="dashboard">
+
+<!-- LEFT -->
+<div class="students-panel">
+
+<h2>Students</h2>
+
+<input type="text" id="searchStudent" placeholder="Search student">
+
+<div id="studentList" style="margin-top:15px"></div>
+
+<hr style="margin:20px 0;border-color:#334155">
+
+<h3>Add Student</h3>
+
+<input type="text" id="studentName" placeholder="Student Name">
+
+<input type="text" id="studentClass" placeholder="Class">
+
+<button onclick="addStudent()">
+Add Student
+</button>
+
+</div>
+
+<!-- RIGHT -->
+<div class="detail-panel">
+
+<div id="studentDetails">
+
+<p>Select a student to manage billing.</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-/* FIREBASE */
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCdirNElI9jmhlGhOmEg4UkhdmHhzprjyw",
-  authDomain: "billing-system-27bc6.firebaseapp.com",
-  projectId: "billing-system-27bc6",
-  storageBucket: "billing-system-27bc6.firebasestorage.app",
-  messagingSenderId: "852317046663",
-  appId: "1:852317046663:web:45cff5ac469552228b3522"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const db = firebase.firestore();
-
 /* LOGIN */
 
-document.getElementById('loginBtn').onclick = () => {
+const PASSWORD = "12345";
 
-  const pass = document.getElementById('password').value;
+function login(){
 
-  if(pass === '12345'){
+const role=document.getElementById("role").value;
+const pass=document.getElementById("password").value;
 
-    document.getElementById('loginPage').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
+if(pass!==PASSWORD){
+showToast("Wrong Password");
+return;
+}
 
-    showToast('Login successful');
+localStorage.setItem("smartedu_login","yes");
+localStorage.setItem("smartedu_role",role);
 
-  }else{
-    showToast('Wrong password');
-  }
-};
+document.getElementById("loginPage").classList.add("hidden");
+document.getElementById("app").classList.remove("hidden");
 
-/* LOGOUT */
+document.getElementById("userInfo").innerHTML=
+"Logged in as: <b>"+role+"</b>";
 
-document.getElementById('logoutBtn').onclick = () => {
-  location.reload();
-};
+}
+
+window.onload=function(){
+
+if(localStorage.getItem("smartedu_login")==="yes"){
+
+document.getElementById("loginPage").classList.add("hidden");
+document.getElementById("app").classList.remove("hidden");
+
+document.getElementById("userInfo").innerHTML=
+"Logged in as: <b>"+localStorage.getItem("smartedu_role")+"</b>";
+
+}
+
+renderStudents();
+updateDashboard();
+
+}
 
 /* NAVIGATION */
 
-document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
+function showPage(id,btn){
 
-  btn.onclick = () => {
-
-    document.querySelectorAll('.nav-btn').forEach(b => {
-      b.classList.remove('active');
-    });
-
-    btn.classList.add('active');
-
-    document.querySelectorAll('.page').forEach(page => {
-      page.classList.add('hidden');
-    });
-
-    document.getElementById(btn.dataset.page).classList.remove('hidden');
-  };
+document.querySelectorAll(".page").forEach(p=>{
+p.classList.remove("active");
 });
+
+document.getElementById(id).classList.add("active");
+
+document.querySelectorAll(".nav-btn").forEach(b=>{
+b.classList.remove("active");
+});
+
+btn.classList.add("active");
+
+document.getElementById("pageTitle").innerText=
+btn.innerText.trim();
+
+}
+
+/* LOGOUT */
+
+function logout(){
+
+localStorage.removeItem("smartedu_login");
+localStorage.removeItem("smartedu_role");
+
+location.reload();
+
+}
 
 /* DATA */
 
-let students = [];
-let teachers = [];
-let selectedStudent = null;
+let students=JSON.parse(localStorage.getItem("students")||"[]");
 
-/* HELPERS */
+function saveData(){
+localStorage.setItem("students",JSON.stringify(students));
+}
 
-function formatUGX(amount){
-  return 'UGX ' + Number(amount).toLocaleString();
+/* UTILITIES */
+
+function formatMoney(num){
+return "UGX "+Number(num).toLocaleString();
 }
 
 function showToast(msg){
 
-  const toast = document.getElementById('toast');
+const toast=document.getElementById("toast");
 
-  toast.innerText = msg;
-  toast.style.opacity = '1';
+toast.innerText=msg;
+toast.style.display="block";
 
-  setTimeout(()=>{
-    toast.style.opacity = '0';
-  },2000);
+setTimeout(()=>{
+toast.style.display="none";
+},2000);
+
 }
 
-/* STUDENTS */
+/* ADD STUDENT */
 
-document.getElementById('addStudentBtn').onclick = () => {
+function addStudent(){
 
-  const name =
-    document.getElementById('studentName').value.trim();
+const name=document.getElementById("studentName").value.trim();
+const cls=document.getElementById("studentClass").value.trim();
 
-  const cls =
-    document.getElementById('studentClass').value.trim();
+if(!name || !cls){
+showToast("Fill all fields");
+return;
+}
 
-  if(!name || !cls){
-    showToast('Fill all fields');
-    return;
-  }
+students.push({
+id:Date.now(),
+name,
+className:cls,
+fees:[],
+payments:[]
+});
 
-  const student = {
-    id: Date.now(),
-    name,
-    className: cls,
-    fees: [],
-    payments: []
-  };
+saveData();
 
-  students.push(student);
+document.getElementById("studentName").value="";
+document.getElementById("studentClass").value="";
 
-  document.getElementById('studentName').value = '';
-  document.getElementById('studentClass').value = '';
+renderStudents();
+updateDashboard();
 
-  renderStudents();
+showToast("Student Added");
 
-  showToast('Student added');
-};
+}
+
+/* RENDER STUDENTS */
 
 function renderStudents(){
 
-  const list =
-    document.getElementById('studentListContainer');
+const list=document.getElementById("studentList");
 
-  const table =
-    document.getElementById('studentsTable');
+if(students.length===0){
 
-  list.innerHTML = '';
-  table.innerHTML = '';
+list.innerHTML="<p>No students added</p>";
+return;
 
-  students.forEach(student => {
+}
 
-    /* LEFT LIST */
+list.innerHTML="";
 
-    const div = document.createElement('div');
+students.forEach(student=>{
 
-    div.className = 'student-item';
+const fees=student.fees.reduce((a,b)=>a+b.amount,0);
+const paid=student.payments.reduce((a,b)=>a+b.amount,0);
+const balance=fees-paid;
 
-    div.innerHTML = `
-      <strong>${student.name}</strong><br>
-      ${student.className}
-    `;
+const div=document.createElement("div");
 
-    div.onclick = () => {
-      openStudent(student.id);
-    };
+div.className="student-item";
 
-    list.appendChild(div);
+div.innerHTML=`
+<div>
+<b>${student.name}</b><br>
+<small>${student.className}</small>
+</div>
 
-    /* TABLE */
+<div class="balance">
+${formatMoney(balance)}
+</div>
+`;
 
-    table.innerHTML += `
-      <tr>
-        <td>${student.name}</td>
-        <td>${student.className}</td>
-      </tr>
-    `;
-  });
+div.onclick=()=>openStudent(student.id);
 
-  document.getElementById('totalStudents').innerText =
-    students.length;
+list.appendChild(div);
 
-  document.getElementById('billingStudentCount').innerText =
-    students.length;
+});
 
-  updateSummary();
 }
 
 /* OPEN STUDENT */
 
 function openStudent(id){
 
-  selectedStudent =
-    students.find(s => s.id === id);
+const student=students.find(s=>s.id===id);
 
-  const panel =
-    document.getElementById('studentDetail');
+if(!student) return;
 
-  let feesHtml = '';
+const fees=student.fees.reduce((a,b)=>a+b.amount,0);
+const paid=student.payments.reduce((a,b)=>a+b.amount,0);
+const balance=fees-paid;
 
-  selectedStudent.fees.forEach(f => {
+document.getElementById("studentDetails").innerHTML=`
 
-    feesHtml += `
-      <tr>
-        <td>${f.description}</td>
-        <td>${formatUGX(f.amount)}</td>
-      </tr>
-    `;
-  });
+<h2>${student.name}</h2>
 
-  let payHtml = '';
+<p>${student.className}</p>
 
-  selectedStudent.payments.forEach(p => {
+<br>
 
-    payHtml += `
-      <tr>
-        <td>${formatUGX(p.amount)}</td>
-        <td>${p.method}</td>
-      </tr>
-    `;
-  });
+<h3>Balance: ${formatMoney(balance)}</h3>
 
-  panel.innerHTML = `
+<hr style="margin:20px 0;border-color:#334155">
 
-    <h2>
-      ${selectedStudent.name}
-    </h2>
+<h3>Add Fee</h3>
 
-    <p style="margin:10px 0;">
-      ${selectedStudent.className}
-    </p>
+<div class="form-row">
 
-    <hr style="margin:20px 0;">
+<div class="form-group">
+<input type="text" id="feeDesc" placeholder="Fee Description">
+</div>
 
-    <h3>Add Fee</h3>
+<div class="form-group">
+<input type="number" id="feeAmount" placeholder="Amount">
+</div>
 
-    <div class="form-row">
+<div class="form-group">
+<button onclick="addFee(${student.id})">
+Add Fee
+</button>
+</div>
 
-      <div class="form-group">
-        <input type="text" id="feeDesc" placeholder="Description">
-      </div>
+</div>
 
-      <div class="form-group">
-        <input type="number" id="feeAmount" placeholder="Amount">
-      </div>
+<h3 style="margin-top:20px">Add Payment</h3>
 
-    </div>
+<div class="form-row">
 
-    <button class="btn" onclick="addFee()">
-      Add Fee
-    </button>
+<div class="form-group">
+<input type="number" id="payAmount" placeholder="Amount">
+</div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${feesHtml}
-      </tbody>
-    </table>
+<div class="form-group">
+<button onclick="addPayment(${student.id})">
+Add Payment
+</button>
+</div>
 
-    <hr style="margin:20px 0;">
+</div>
 
-    <h3>Add Payment</h3>
+<h3 style="margin-top:25px">Fees</h3>
 
-    <div class="form-row">
+<table>
 
-      <div class="form-group">
-        <input type="number" id="payAmount" placeholder="Amount">
-      </div>
+<thead>
+<tr>
+<th>Description</th>
+<th>Amount</th>
+</tr>
+</thead>
 
-      <div class="form-group">
-        <select id="payMethod">
-          <option>Cash</option>
-          <option>MTN</option>
-          <option>Airtel</option>
-          <option>Bank</option>
-        </select>
-      </div>
+<tbody>
 
-    </div>
+${student.fees.map(f=>`
+<tr>
+<td>${f.description}</td>
+<td>${formatMoney(f.amount)}</td>
+</tr>
+`).join("")}
 
-    <button class="btn" onclick="addPayment()">
-      Add Payment
-    </button>
+</tbody>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Amount</th>
-          <th>Method</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${payHtml}
-      </tbody>
-    </table>
+</table>
 
-  `;
+<h3 style="margin-top:25px">Payments</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>Amount</th>
+</tr>
+</thead>
+
+<tbody>
+
+${student.payments.map(p=>`
+<tr>
+<td>${formatMoney(p.amount)}</td>
+</tr>
+`).join("")}
+
+</tbody>
+
+</table>
+`;
+
 }
 
-/* FEES */
+/* ADD FEE */
 
-function addFee(){
+function addFee(id){
 
-  const desc =
-    document.getElementById('feeDesc').value;
+const student=students.find(s=>s.id===id);
 
-  const amount =
-    Number(document.getElementById('feeAmount').value);
+const desc=document.getElementById("feeDesc").value.trim();
+const amount=Number(document.getElementById("feeAmount").value);
 
-  if(!desc || !amount){
-    showToast('Fill all fee fields');
-    return;
-  }
-
-  selectedStudent.fees.push({
-    description: desc,
-    amount
-  });
-
-  openStudent(selectedStudent.id);
-
-  updateSummary();
-
-  showToast('Fee added');
+if(!desc || !amount){
+showToast("Fill fee details");
+return;
 }
 
-/* PAYMENTS */
-
-function addPayment(){
-
-  const amount =
-    Number(document.getElementById('payAmount').value);
-
-  const method =
-    document.getElementById('payMethod').value;
-
-  if(!amount){
-    showToast('Enter payment');
-    return;
-  }
-
-  selectedStudent.payments.push({
-    amount,
-    method
-  });
-
-  openStudent(selectedStudent.id);
-
-  updateSummary();
-
-  showToast('Payment added');
-}
-
-/* SUMMARY */
-
-function updateSummary(){
-
-  let collected = 0;
-  let pending = 0;
-
-  students.forEach(student => {
-
-    let fees = 0;
-    let paid = 0;
-
-    student.fees.forEach(f => {
-      fees += Number(f.amount);
-    });
-
-    student.payments.forEach(p => {
-      paid += Number(p.amount);
-    });
-
-    collected += paid;
-    pending += (fees - paid);
-  });
-
-  document.getElementById('totalCollected').innerText =
-    formatUGX(collected);
-
-  document.getElementById('totalPending').innerText =
-    formatUGX(pending);
-
-  document.getElementById('totalFees').innerText =
-    formatUGX(collected);
-}
-
-/* TEACHERS */
-
-document.getElementById('addTeacherBtn').onclick = () => {
-
-  const name =
-    document.getElementById('teacherName').value;
-
-  const subject =
-    document.getElementById('teacherSubject').value;
-
-  if(!name || !subject){
-    showToast('Fill all fields');
-    return;
-  }
-
-  teachers.push({
-    name,
-    subject
-  });
-
-  renderTeachers();
-
-  showToast('Teacher added');
-};
-
-function renderTeachers(){
-
-  const table =
-    document.getElementById('teachersTable');
-
-  table.innerHTML = '';
-
-  teachers.forEach(t => {
-
-    table.innerHTML += `
-      <tr>
-        <td>${t.name}</td>
-        <td>${t.subject}</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById('totalTeachers').innerText =
-    teachers.length;
-}
-
-/* SEARCH */
-
-document.getElementById('searchStudent').oninput = function(){
-
-  const q = this.value.toLowerCase();
-
-  const items =
-    document.querySelectorAll('.student-item');
-
-  items.forEach((item,index)=>{
-
-    const student = students[index];
-
-    const visible =
-      student.name.toLowerCase().includes(q) ||
-      student.className.toLowerCase().includes(q);
-
-    item.style.display =
-      visible ? 'block' : 'none';
-  });
-};
-
-/* IMPORT */
-
-document.getElementById('importBtn').onclick = () => {
-  document.getElementById('excelFile').click();
-};
-
-document.getElementById('excelFile').addEventListener('change',e=>{
-
-  const file = e.target.files[0];
-
-  if(!file) return;
-
-  const reader = new FileReader();
-
-  reader.onload = function(evt){
-
-    const data = new Uint8Array(evt.target.result);
-
-    const workbook =
-      XLSX.read(data,{type:'array'});
-
-    const sheet =
-      workbook.Sheets[workbook.SheetNames[0]];
-
-    const json =
-      XLSX.utils.sheet_to_json(sheet);
-
-    json.forEach(row=>{
-
-      students.push({
-        id: Date.now() + Math.random(),
-        name: row.Name || 'Student',
-        className: row.Class || '',
-        fees: [],
-        payments: []
-      });
-    });
-
-    renderStudents();
-
-    showToast('Excel imported');
-  };
-
-  reader.readAsArrayBuffer(file);
+student.fees.push({
+description:desc,
+amount
 });
 
-/* EXPORT */
+saveData();
 
-document.getElementById('exportBtn').onclick = ()=>{
+openStudent(id);
+renderStudents();
+updateDashboard();
 
-  const data = students.map(s=>({
+showToast("Fee Added");
 
-    Name:s.name,
-    Class:s.className
+}
 
-  }));
+/* ADD PAYMENT */
 
-  const ws =
-    XLSX.utils.json_to_sheet(data);
+function addPayment(id){
 
-  const wb =
-    XLSX.utils.book_new();
+const student=students.find(s=>s.id===id);
 
-  XLSX.utils.book_append_sheet(
-    wb,
-    ws,
-    'Students'
-  );
+const amount=Number(document.getElementById("payAmount").value);
 
-  XLSX.writeFile(
-    wb,
-    'SmartEdu.xlsx'
-  );
-};
+if(!amount){
+showToast("Enter payment amount");
+return;
+}
 
-/* PRINT */
+student.payments.push({
+amount
+});
 
-document.getElementById('printBtn').onclick = ()=>{
-  window.print();
-};
+saveData();
+
+openStudent(id);
+renderStudents();
+updateDashboard();
+
+showToast("Payment Added");
+
+}
+
+/* DASHBOARD */
+
+function updateDashboard(){
+
+document.getElementById("studentCount").innerText=
+students.length;
+
+let collected=0;
+let pending=0;
+
+students.forEach(s=>{
+
+const fees=s.fees.reduce((a,b)=>a+b.amount,0);
+const paid=s.payments.reduce((a,b)=>a+b.amount,0);
+
+collected+=paid;
+pending+=(fees-paid);
+
+});
+
+document.getElementById("totalCollected").innerText=
+formatMoney(collected);
+
+document.getElementById("totalPending").innerText=
+formatMoney(pending);
+
+}
 </script>
 
 </body>
