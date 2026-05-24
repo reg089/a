@@ -1,101 +1,1069 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SmartEdu Enterprise</title>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<!-- Excel -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
 <style>
 :root{
-  --bg:#0f172a;--bg2:#1e293b;--bg3:#334155;--text:#e2e8f0;--text2:#94a3b8;
-  --accent:#38bdf8;--accent2:#10b981;--danger:#ef4444;--warning:#f59e0b;
-  --radius:12px;--shadow:0 8px 24px rgba(0,0,0,0.3)
-}
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-body{background:var(--bg);color:var(--text);min-height:100vh}
-.hidden{display:none!important}
-.container{max-width:1100px;margin:auto;padding:20px;min-height:100vh;display:flex;align-items:center;justify-content:center}
-.card{background:var(--bg2);padding:28px;border-radius:var(--radius);box-shadow:var(--shadow)}
-.login-card{width:100%;max-width:420px}
-input,select,button,textarea{
-  width:100%;padding:12px 16px;margin:8px 0;border-radius:10px;
-  border:1px solid var(--bg3);background:var(--bg3);color:var(--text);
-  font-size:16px;outline:none;transition:0.2s
-}
-input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(56,189,248,0.2)}
-.btn{background:var(--accent);color:#000;font-weight:600;cursor:pointer;border:none}
-.btn:hover{opacity:0.9;transform:translateY(-1px)}
-.btn-secondary{background:var(--bg3);color:var(--text)}
-.btn-danger{background:var(--danger);color:#fff}
-.sidebar{
-  width:260px;position:fixed;height:100vh;background:var(--bg2);
-  padding:24px;border-right:1px solid var(--bg3);transition:0.3s;z-index:100
-}
-.sidebar h3{margin-bottom:24px;color:var(--accent);font-size:1.4rem}
-.nav-btn{
-  width:100%;padding:12px 16px;margin:6px 0;border-radius:10px;
-  background:transparent;color:var(--text);text-align:left;cursor:pointer;
-  transition:0.2s;display:flex;align-items:center;gap:10px
-}
-.nav-btn:hover{background:var(--bg3)}
-.nav-btn.active{background:var(--accent);color:#000}
-.main{margin-left:260px;padding:28px;transition:0.3s}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:var(--bg2);padding:20px;border-radius:var(--radius);box-shadow:var(--shadow)}
-.stat-card h3{color:var(--text2);font-size:0.85rem;text-transform:uppercase;margin-bottom:8px}
-.stat-card h2{font-size:2rem}
-.table-wrap{overflow-x:auto;border-radius:10px}
-table{width:100%;border-collapse:collapse;min-width:600px}
-th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--bg3)}
-th{color:var(--text2);font-size:0.85rem;text-transform:uppercase}
-.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:0.8rem;font-weight:600}
-.badge-admin{background:rgba(239,68,68,0.2);color:var(--danger)}
-.badge-teacher{background:rgba(245,158,11,0.2);color:var(--warning)}
-.badge-student{background:rgba(16,185,129,0.2);color:var(--accent2)}
-.toast{
-  position:fixed;bottom:24px;right:24px;background:var(--accent2);color:#fff;
-  padding:14px 20px;border-radius:10px;opacity:0;transform:translateY(20px);
-  transition:0.3s;z-index:1000;box-shadow:var(--shadow)
-}
-.toast.show{opacity:1;transform:translateY(0)}
-.toast.error{background:var(--danger)}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99}
-.overlay.show{display:block}
-.menu-toggle{display:none;background:var(--accent);border:none;color:#000;padding:10px 14px;border-radius:10px}
-.loading{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-top:transparent;border-radius:50%;animation:spin 0.8s linear infinite}
-.chat-box{height:300px;overflow-y:auto;background:var(--bg3);padding:12px;border-radius:10px;margin-bottom:12px}
-.chat-msg{margin:8px 0;padding:10px;border-radius:8px}
-.chat-msg.user{background:var(--accent);color:#000}
-.chat-msg.ai{background:var(--bg2)}
-@keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:768px){
- .sidebar{left:-260px}
- .sidebar.show{left:0}
- .main{margin-left:0;padding:18px}
- .menu-toggle{display:block}
+  --bg:#0f172a;
+  --bg2:#1e293b;
+  --bg3:#334155;
+  --text:#e2e8f0;
+  --accent:#38bdf8;
+  --success:#10b981;
+  --danger:#ef4444;
 }
 
-/* Billing Styles */
-.billing-container {max-width: 1500px;margin: 0 auto;display: none;}
-.billing-header {display: flex;justify-content: space-between;align-items: center;flex-wrap: wrap;gap: 1rem;margin-bottom: 1.8rem;}
-.billing-header h1 {font-size: 1.8rem;font-weight: 700;background: linear-gradient(135deg, #14532d, #1e3a8a);background-clip: text;-webkit-background-clip: text;color: transparent;display: flex;align-items: center;gap: 8px;}
-.billing-action-buttons {display: flex;gap: 0.75rem;flex-wrap: wrap;align-items: center;}
-.billing-sync-status {font-size: 0.8rem;color: #14532d;font-weight: 500;}
-.billing-summary-cards {display: flex;gap: 1.5rem;flex-wrap: wrap;margin-bottom: 2rem;}
-.billing-card {background: white;border-radius: 24px;padding: 1.2rem 1.8rem;flex: 1;min-width: 180px;box-shadow: 0 4px 12px rgba(0,0,0,0.03);border: 1px solid #e2edf2;color:#0f172a;}
-.billing-card h3 {font-size: 0.8rem;font-weight: 500;text-transform: uppercase;letter-spacing: 0.5px;color: #2d4a22;margin-bottom: 0.5rem;}
-.billing-card .amount {font-size: 1.8rem;font-weight: 700;color: #0f172a;}
-.billing-dashboard {display: flex;flex-wrap: wrap;gap: 1.8rem;}
-.billing-students-panel {flex: 1.2;min-width: 300px;background: white;border-radius: 28px;padding: 1.2rem;border: 1px solid #e2edf2;box-shadow: 0 8px 20px rgba(0,0,0,0.02);height: fit-content;color:#0f172a;}
-.billing-detail-panel {flex: 2.5;min-width: 340px;background: white;border-radius: 28px;padding: 1.2rem 1.5rem;border: 1px solid #e2edf2;color:#0f172a;}
-.billing-panel-title {font-size: 1.2rem;font-weight: 600;margin-bottom: 1rem;display: flex;align-items: center;gap: 0.5rem;border-left: 4px solid #14532d;padding-left: 0.75rem;}
-.billing-search-box {margin-bottom: 1.2rem;width: 100%;}
-.billing-search-box input {width: 100%;padding: 0.7rem 1rem;border-radius: 40px;border: 1px solid #cbd5e1;font-size: 0.85rem;background: #ffffff;outline: none;color:#0f172a;}
-.billing-search-box input:focus {border-color: #14532d;box-shadow: 0 0 0 3px rgba(20,83,45
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+}
+
+.hidden{
+  display:none!important;
+}
+
+/* LOGIN */
+
+.container{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.login-card{
+  width:100%;
+  max-width:400px;
+  background:var(--bg2);
+  padding:30px;
+  border-radius:20px;
+}
+
+input,
+select,
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:12px;
+  font-size:15px;
+}
+
+input,
+select{
+  background:var(--bg3);
+  color:white;
+}
+
+button{
+  cursor:pointer;
+}
+
+.btn{
+  background:var(--accent);
+  color:black;
+  font-weight:bold;
+}
+
+.btn-danger{
+  background:var(--danger);
+  color:white;
+}
+
+/* APP */
+
+.sidebar{
+  width:250px;
+  background:var(--bg2);
+  height:100vh;
+  position:fixed;
+  left:0;
+  top:0;
+  padding:20px;
+}
+
+.sidebar h2{
+  margin-bottom:20px;
+  color:var(--accent);
+}
+
+.nav-btn{
+  background:none;
+  color:white;
+  text-align:left;
+  margin:5px 0;
+}
+
+.nav-btn.active{
+  background:var(--accent);
+  color:black;
+}
+
+.main{
+  margin-left:250px;
+  padding:20px;
+}
+
+.page{
+  margin-top:20px;
+}
+
+/* CARDS */
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:15px;
+}
+
+.card{
+  background:var(--bg2);
+  padding:20px;
+  border-radius:20px;
+}
+
+.card h3{
+  margin-bottom:10px;
+}
+
+/* TABLE */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th,td{
+  border-bottom:1px solid #334155;
+  padding:10px;
+  text-align:left;
+}
+
+/* BILLING SYSTEM */
+
+.billing-wrapper{
+  background:#f0f3f8;
+  color:#0f172a;
+  border-radius:20px;
+  padding:20px;
+}
+
+.summary-cards{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+
+.summary-card{
+  flex:1;
+  min-width:180px;
+  background:white;
+  padding:20px;
+  border-radius:20px;
+}
+
+.summary-card h4{
+  margin-bottom:10px;
+}
+
+.summary-amount{
+  font-size:1.5rem;
+  font-weight:bold;
+}
+
+.dashboard{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.students-panel{
+  flex:1;
+  min-width:300px;
+  background:white;
+  padding:20px;
+  border-radius:20px;
+}
+
+.detail-panel{
+  flex:2;
+  min-width:350px;
+  background:white;
+  padding:20px;
+  border-radius:20px;
+}
+
+.student-list{
+  margin-top:15px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-height:60vh;
+  overflow:auto;
+}
+
+.student-item{
+  background:#f8fafc;
+  padding:12px;
+  border-radius:15px;
+  border:1px solid #e2e8f0;
+  cursor:pointer;
+}
+
+.student-item:hover{
+  background:#eef4ea;
+}
+
+.form-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.form-group{
+  flex:1;
+  min-width:150px;
+}
+
+.notification{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:black;
+  color:white;
+  padding:10px 20px;
+  border-radius:30px;
+  opacity:0;
+  transition:0.3s;
+}
+
+@media(max-width:768px){
+
+  .sidebar{
+    width:100%;
+    height:auto;
+    position:relative;
+  }
+
+  .main{
+    margin-left:0;
+  }
+
+  .dashboard{
+    flex-direction:column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- TOAST -->
+<div class="notification" id="toast"></div>
+
+<!-- LOGIN -->
+<div id="loginPage" class="container">
+
+  <div class="login-card">
+
+    <h2>SmartEdu Enterprise</h2>
+
+    <select id="role">
+      <option value="admin">Admin</option>
+      <option value="teacher">Teacher</option>
+      <option value="student">Student</option>
+    </select>
+
+    <input type="password" id="password" placeholder="Password">
+
+    <button class="btn" id="loginBtn">
+      Login
+    </button>
+
+  </div>
+
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <h2>SmartEdu</h2>
+
+    <button class="nav-btn active" data-page="dashboard">
+      📊 Dashboard
+    </button>
+
+    <button class="nav-btn" data-page="billing">
+      💰 Billing
+    </button>
+
+    <button class="nav-btn" data-page="students">
+      👨‍🎓 Students
+    </button>
+
+    <button class="nav-btn" data-page="teachers">
+      👨‍🏫 Teachers
+    </button>
+
+    <button class="nav-btn btn-danger" id="logoutBtn">
+      Logout
+    </button>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="page">
+
+      <div class="grid">
+
+        <div class="card">
+          <h3>Total Students</h3>
+          <h1 id="totalStudents">0</h1>
+        </div>
+
+        <div class="card">
+          <h3>Total Teachers</h3>
+          <h1 id="totalTeachers">0</h1>
+        </div>
+
+        <div class="card">
+          <h3>Total Fees</h3>
+          <h1 id="totalFees">UGX 0</h1>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- BILLING -->
+    <div id="billing" class="page hidden">
+
+      <div class="billing-wrapper">
+
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+
+          <h2 style="color:#14532d;">
+            📚 SmartEdu Billing System
+          </h2>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+
+            <input type="file" id="excelFile" hidden accept=".xlsx,.xls">
+
+            <button id="importBtn">
+              📁 Import Excel
+            </button>
+
+            <button id="exportBtn">
+              📊 Export Excel
+            </button>
+
+            <button id="printBtn">
+              🖨️ Print
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-cards">
+
+          <div class="summary-card">
+            <h4>Total Collected</h4>
+            <div class="summary-amount" id="totalCollected">
+              UGX 0
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <h4>Total Pending</h4>
+            <div class="summary-amount" id="totalPending">
+              UGX 0
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <h4>Students</h4>
+            <div class="summary-amount" id="billingStudentCount">
+              0
+            </div>
+          </div>
+
+        </div>
+
+        <!-- DASHBOARD -->
+        <div class="dashboard">
+
+          <!-- LEFT -->
+          <div class="students-panel">
+
+            <h3>👥 Students</h3>
+
+            <input
+              type="text"
+              id="searchStudent"
+              placeholder="Search student..."
+            >
+
+            <div class="student-list" id="studentListContainer"></div>
+
+            <hr style="margin:20px 0;">
+
+            <h3>Add Student</h3>
+
+            <div class="form-row">
+
+              <div class="form-group">
+                <input type="text" id="studentName" placeholder="Student name">
+              </div>
+
+              <div class="form-group">
+                <input type="text" id="studentClass" placeholder="Class">
+              </div>
+
+            </div>
+
+            <button class="btn" id="addStudentBtn">
+              Add Student
+            </button>
+
+          </div>
+
+          <!-- RIGHT -->
+          <div class="detail-panel">
+
+            <div id="studentDetail">
+
+              <p>
+                👈 Select student to manage billing
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- STUDENTS -->
+    <div id="students" class="page hidden">
+
+      <div class="card">
+
+        <h2>Students List</h2>
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Class</th>
+            </tr>
+          </thead>
+
+          <tbody id="studentsTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    <!-- TEACHERS -->
+    <div id="teachers" class="page hidden">
+
+      <div class="card">
+
+        <h2>Teachers</h2>
+
+        <div class="form-row">
+
+          <div class="form-group">
+            <input type="text" id="teacherName" placeholder="Teacher name">
+          </div>
+
+          <div class="form-group">
+            <input type="text" id="teacherSubject" placeholder="Subject">
+          </div>
+
+        </div>
+
+        <button class="btn" id="addTeacherBtn">
+          Add Teacher
+        </button>
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Subject</th>
+            </tr>
+          </thead>
+
+          <tbody id="teachersTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/* FIREBASE */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCdirNElI9jmhlGhOmEg4UkhdmHhzprjyw",
+  authDomain: "billing-system-27bc6.firebaseapp.com",
+  projectId: "billing-system-27bc6",
+  storageBucket: "billing-system-27bc6.firebasestorage.app",
+  messagingSenderId: "852317046663",
+  appId: "1:852317046663:web:45cff5ac469552228b3522"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+/* LOGIN */
+
+document.getElementById('loginBtn').onclick = () => {
+
+  const pass = document.getElementById('password').value;
+
+  if(pass === '12345'){
+
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+
+    showToast('Login successful');
+
+  }else{
+    showToast('Wrong password');
+  }
+};
+
+/* LOGOUT */
+
+document.getElementById('logoutBtn').onclick = () => {
+  location.reload();
+};
+
+/* NAVIGATION */
+
+document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
+
+  btn.onclick = () => {
+
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      b.classList.remove('active');
+    });
+
+    btn.classList.add('active');
+
+    document.querySelectorAll('.page').forEach(page => {
+      page.classList.add('hidden');
+    });
+
+    document.getElementById(btn.dataset.page).classList.remove('hidden');
+  };
+});
+
+/* DATA */
+
+let students = [];
+let teachers = [];
+let selectedStudent = null;
+
+/* HELPERS */
+
+function formatUGX(amount){
+  return 'UGX ' + Number(amount).toLocaleString();
+}
+
+function showToast(msg){
+
+  const toast = document.getElementById('toast');
+
+  toast.innerText = msg;
+  toast.style.opacity = '1';
+
+  setTimeout(()=>{
+    toast.style.opacity = '0';
+  },2000);
+}
+
+/* STUDENTS */
+
+document.getElementById('addStudentBtn').onclick = () => {
+
+  const name =
+    document.getElementById('studentName').value.trim();
+
+  const cls =
+    document.getElementById('studentClass').value.trim();
+
+  if(!name || !cls){
+    showToast('Fill all fields');
+    return;
+  }
+
+  const student = {
+    id: Date.now(),
+    name,
+    className: cls,
+    fees: [],
+    payments: []
+  };
+
+  students.push(student);
+
+  document.getElementById('studentName').value = '';
+  document.getElementById('studentClass').value = '';
+
+  renderStudents();
+
+  showToast('Student added');
+};
+
+function renderStudents(){
+
+  const list =
+    document.getElementById('studentListContainer');
+
+  const table =
+    document.getElementById('studentsTable');
+
+  list.innerHTML = '';
+  table.innerHTML = '';
+
+  students.forEach(student => {
+
+    /* LEFT LIST */
+
+    const div = document.createElement('div');
+
+    div.className = 'student-item';
+
+    div.innerHTML = `
+      <strong>${student.name}</strong><br>
+      ${student.className}
+    `;
+
+    div.onclick = () => {
+      openStudent(student.id);
+    };
+
+    list.appendChild(div);
+
+    /* TABLE */
+
+    table.innerHTML += `
+      <tr>
+        <td>${student.name}</td>
+        <td>${student.className}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('totalStudents').innerText =
+    students.length;
+
+  document.getElementById('billingStudentCount').innerText =
+    students.length;
+
+  updateSummary();
+}
+
+/* OPEN STUDENT */
+
+function openStudent(id){
+
+  selectedStudent =
+    students.find(s => s.id === id);
+
+  const panel =
+    document.getElementById('studentDetail');
+
+  let feesHtml = '';
+
+  selectedStudent.fees.forEach(f => {
+
+    feesHtml += `
+      <tr>
+        <td>${f.description}</td>
+        <td>${formatUGX(f.amount)}</td>
+      </tr>
+    `;
+  });
+
+  let payHtml = '';
+
+  selectedStudent.payments.forEach(p => {
+
+    payHtml += `
+      <tr>
+        <td>${formatUGX(p.amount)}</td>
+        <td>${p.method}</td>
+      </tr>
+    `;
+  });
+
+  panel.innerHTML = `
+
+    <h2>
+      ${selectedStudent.name}
+    </h2>
+
+    <p style="margin:10px 0;">
+      ${selectedStudent.className}
+    </p>
+
+    <hr style="margin:20px 0;">
+
+    <h3>Add Fee</h3>
+
+    <div class="form-row">
+
+      <div class="form-group">
+        <input type="text" id="feeDesc" placeholder="Description">
+      </div>
+
+      <div class="form-group">
+        <input type="number" id="feeAmount" placeholder="Amount">
+      </div>
+
+    </div>
+
+    <button class="btn" onclick="addFee()">
+      Add Fee
+    </button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${feesHtml}
+      </tbody>
+    </table>
+
+    <hr style="margin:20px 0;">
+
+    <h3>Add Payment</h3>
+
+    <div class="form-row">
+
+      <div class="form-group">
+        <input type="number" id="payAmount" placeholder="Amount">
+      </div>
+
+      <div class="form-group">
+        <select id="payMethod">
+          <option>Cash</option>
+          <option>MTN</option>
+          <option>Airtel</option>
+          <option>Bank</option>
+        </select>
+      </div>
+
+    </div>
+
+    <button class="btn" onclick="addPayment()">
+      Add Payment
+    </button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Amount</th>
+          <th>Method</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${payHtml}
+      </tbody>
+    </table>
+
+  `;
+}
+
+/* FEES */
+
+function addFee(){
+
+  const desc =
+    document.getElementById('feeDesc').value;
+
+  const amount =
+    Number(document.getElementById('feeAmount').value);
+
+  if(!desc || !amount){
+    showToast('Fill all fee fields');
+    return;
+  }
+
+  selectedStudent.fees.push({
+    description: desc,
+    amount
+  });
+
+  openStudent(selectedStudent.id);
+
+  updateSummary();
+
+  showToast('Fee added');
+}
+
+/* PAYMENTS */
+
+function addPayment(){
+
+  const amount =
+    Number(document.getElementById('payAmount').value);
+
+  const method =
+    document.getElementById('payMethod').value;
+
+  if(!amount){
+    showToast('Enter payment');
+    return;
+  }
+
+  selectedStudent.payments.push({
+    amount,
+    method
+  });
+
+  openStudent(selectedStudent.id);
+
+  updateSummary();
+
+  showToast('Payment added');
+}
+
+/* SUMMARY */
+
+function updateSummary(){
+
+  let collected = 0;
+  let pending = 0;
+
+  students.forEach(student => {
+
+    let fees = 0;
+    let paid = 0;
+
+    student.fees.forEach(f => {
+      fees += Number(f.amount);
+    });
+
+    student.payments.forEach(p => {
+      paid += Number(p.amount);
+    });
+
+    collected += paid;
+    pending += (fees - paid);
+  });
+
+  document.getElementById('totalCollected').innerText =
+    formatUGX(collected);
+
+  document.getElementById('totalPending').innerText =
+    formatUGX(pending);
+
+  document.getElementById('totalFees').innerText =
+    formatUGX(collected);
+}
+
+/* TEACHERS */
+
+document.getElementById('addTeacherBtn').onclick = () => {
+
+  const name =
+    document.getElementById('teacherName').value;
+
+  const subject =
+    document.getElementById('teacherSubject').value;
+
+  if(!name || !subject){
+    showToast('Fill all fields');
+    return;
+  }
+
+  teachers.push({
+    name,
+    subject
+  });
+
+  renderTeachers();
+
+  showToast('Teacher added');
+};
+
+function renderTeachers(){
+
+  const table =
+    document.getElementById('teachersTable');
+
+  table.innerHTML = '';
+
+  teachers.forEach(t => {
+
+    table.innerHTML += `
+      <tr>
+        <td>${t.name}</td>
+        <td>${t.subject}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('totalTeachers').innerText =
+    teachers.length;
+}
+
+/* SEARCH */
+
+document.getElementById('searchStudent').oninput = function(){
+
+  const q = this.value.toLowerCase();
+
+  const items =
+    document.querySelectorAll('.student-item');
+
+  items.forEach((item,index)=>{
+
+    const student = students[index];
+
+    const visible =
+      student.name.toLowerCase().includes(q) ||
+      student.className.toLowerCase().includes(q);
+
+    item.style.display =
+      visible ? 'block' : 'none';
+  });
+};
+
+/* IMPORT */
+
+document.getElementById('importBtn').onclick = () => {
+  document.getElementById('excelFile').click();
+};
+
+document.getElementById('excelFile').addEventListener('change',e=>{
+
+  const file = e.target.files[0];
+
+  if(!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(evt){
+
+    const data = new Uint8Array(evt.target.result);
+
+    const workbook =
+      XLSX.read(data,{type:'array'});
+
+    const sheet =
+      workbook.Sheets[workbook.SheetNames[0]];
+
+    const json =
+      XLSX.utils.sheet_to_json(sheet);
+
+    json.forEach(row=>{
+
+      students.push({
+        id: Date.now() + Math.random(),
+        name: row.Name || 'Student',
+        className: row.Class || '',
+        fees: [],
+        payments: []
+      });
+    });
+
+    renderStudents();
+
+    showToast('Excel imported');
+  };
+
+  reader.readAsArrayBuffer(file);
+});
+
+/* EXPORT */
+
+document.getElementById('exportBtn').onclick = ()=>{
+
+  const data = students.map(s=>({
+
+    Name:s.name,
+    Class:s.className
+
+  }));
+
+  const ws =
+    XLSX.utils.json_to_sheet(data);
+
+  const wb =
+    XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    ws,
+    'Students'
+  );
+
+  XLSX.writeFile(
+    wb,
+    'SmartEdu.xlsx'
+  );
+};
+
+/* PRINT */
+
+document.getElementById('printBtn').onclick = ()=>{
+  window.print();
+};
+</script>
+
+</body>
+</html>
