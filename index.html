@@ -310,6 +310,11 @@ th{color:var(--text2);font-size:0.85rem;text-transform:uppercase}
 </div>
 
 <script>
+// ===== CHANGE THESE PASSWORDS =====
+const ADMIN_PASS = "admin123";
+const TEACHER_PASS = "teacher123";
+// ==================================
+
 const firebaseConfig = {
   apiKey: "AIzaSyCdirNElI9jmhlGhOmEg4UkhdmHhzprjyw",
   authDomain: "billing-system-27bc6.firebaseapp.com",
@@ -378,11 +383,9 @@ async function staffLogin(){
 
   try{
     document.getElementById('staffLoginBtn').innerHTML = '<span class="loading"></span> Checking...';
-    const passDoc = await db.collection('settings').doc('passwords').get();
-    if(!passDoc.exists) throw new Error("Passwords not set in Firestore");
-
-    const correctPass = role === 'admin'? passDoc.data().adminPass : passDoc.data().teacherPass;
-    if(pass!== correctPass) throw new Error("Wrong password");
+    
+    const correctPass = role === 'admin' ? ADMIN_PASS : TEACHER_PASS;
+    if(pass !== correctPass) throw new Error("Wrong password");
 
     const cred = await auth.signInAnonymously();
     userRole = role;
@@ -584,7 +587,7 @@ function loadAttendanceList(students){
       <span>${d.name} - ${d.class}</span>
       <button class="btn" style="padding:6px 12px;width:auto" onclick="markAttendance('${doc.id}')">Present</button>
     </div>`;
-   });
+  });
   document.getElementById('attendanceList').innerHTML=html||'<p style="color:var(--text2)">No students</p>';
 }
 
