@@ -584,8 +584,7 @@ function loadAttendanceList(students){
       <span>${d.name} - ${d.class}</span>
       <button class="btn" style="padding:6px 12px;width:auto" onclick="markAttendance('${doc.id}')">Present</button>
     </div>`;
-  });
-  
+   });
   document.getElementById('attendanceList').innerHTML=html||'<p style="color:var(--text2)">No students</p>';
 }
 
